@@ -31,6 +31,9 @@ public class Classification {
     public Boolean getInsertionClassification() {
         return insertionClassification;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return this.classificationNode.getClassificationString();
+    }
 }

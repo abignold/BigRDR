@@ -6,7 +6,6 @@
 package bigrdr;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -15,8 +14,8 @@ import java.util.Map;
 public class Case extends HashMap<String, Object>{
     
     public void print(){
-        for(Map.Entry<String, Object> me : this.entrySet()){
+        this.entrySet().stream().forEach((me) -> {
             System.out.println(me.getKey() + "\t" + RuleFormatter.formatVariable(me.getValue()) + "\t" + me.getValue().getClass().getSimpleName());
-        }
+        });
     }
 }
