@@ -33,7 +33,8 @@ public class Node {
     public boolean testRule(Case testCase) throws ScriptException{
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("js");
-        Object result = engine.eval(this.rule);
+        String substitutedRule = RuleFormatter.createSubstitutedRule(rule, testCase);
+        Object result = engine.eval(substitutedRule);
         return (Boolean) result;
     }
     
