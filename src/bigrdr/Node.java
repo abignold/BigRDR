@@ -5,7 +5,6 @@
  */
 package bigrdr;
 
-import com.sun.xml.internal.ws.util.StringUtils;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
