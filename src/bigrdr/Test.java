@@ -21,7 +21,7 @@ public class Test {
 
     private static void testTreeCreation(Case testCase) throws ScriptException {
         System.out.println("Testing tree creation");
-        Tree tree = new Tree();
+        RDRTree tree = new RDRTree();
         System.out.println("-----TREE-TEST-----");
         Classification result = tree.classify(testCase);
         System.out.println("Classification: " + result.getClassificationNode().getClassificationString());

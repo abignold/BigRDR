@@ -5,6 +5,7 @@
  */
 package bigrdr;
 
+import com.sun.xml.internal.ws.util.StringUtils;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -14,6 +15,7 @@ import javax.script.ScriptException;
  * @author Adam
  */
 public class Node {
+
     private Node trueNode = null;
     private Node falseNode = null;
     private String rule = null;
@@ -22,23 +24,22 @@ public class Node {
 
     public Node() {
         this.rule = "true";
-        this.classificationString = "Always True";
+        this.classificationString = "NO CLASS SET";
     }
-    
-    public Node(String rule, String classificationString){
+
+    public Node(String rule, String classificationString) {
         this.rule = rule;
         this.classificationString = classificationString;
     }
 
-    public boolean testRule(Case testCase) throws ScriptException{
+    public boolean testRule(Case testCase) throws ScriptException {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("js");
         String substitutedRule = RuleFormatter.createSubstitutedRule(rule, testCase);
         Object result = engine.eval(substitutedRule);
         return (Boolean) result;
     }
-    
-    
+
     public Node getTrueNode() {
         return trueNode;
     }
@@ -53,6 +54,14 @@ public class Node {
 
     public void setFalseNode(Node falseNode) {
         this.falseNode = falseNode;
+    }
+
+    public void addNode(Node n, boolean sideToAddOn) {
+        if (sideToAddOn) {
+            this.setTrueNode(n);
+        } else {
+            this.setFalseNode(n);
+        }
     }
 
     public String getRule() {
@@ -78,6 +87,32 @@ public class Node {
     public void setCornerstoneCase(Case cornerstoneCase) {
         this.cornerstoneCase = cornerstoneCase;
     }
-    
-    
+
+    public String recusiveNodeString(int indentation) {
+        String s = "";
+        for (int i = 0; i < indentation; i++) {
+            s += "|   ";
+        }
+        s += this.rule + " (" + this.classificationString + ")\n";
+        
+        if (this.trueNode == null && this.falseNode == null) return s;
+        if (this.trueNode != null) {
+            s += this.trueNode.recusiveNodeString(indentation + 1);
+        } else {
+            for (int i = 0; i < indentation+1; i++) {
+                s += "|   ";
+            }
+            s += "NONE\n";
+        }
+        if (this.falseNode != null) {
+            s += this.falseNode.recusiveNodeString(indentation + 1);
+        } else {
+            for (int i = 0; i < indentation+1; i++) {
+                s += "|   ";
+            }
+            s += "NONE\n";
+        }
+        return s;
+    }
+
 }
