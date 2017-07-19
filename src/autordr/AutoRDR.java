@@ -40,8 +40,11 @@ public class AutoRDR {
             {"7.0", "3.2", "4.7", "1.4", "Iris-versicolor"},
             {"5.9", "3.0", "5.1", "1.8", "Iris-virginica"}
         };
-        CaseList caseList = CaseList.createFromArray(matrix);
-//        CaseList caseList = CaseList.createFromFile("iris.csv");
+//        CaseList caseList = CaseList.createFromArray(matrix);
+//        CaseList caseList = CaseList.createFromFile("export.csv");
+        CaseList caseList = CaseList.createFromFile("iris.csv");
+        
+        
         RDRTree rdr = AutoRDR.createRDR(caseList);
         System.out.println(rdr);
         rdr.evaluate(caseList);
@@ -207,16 +210,35 @@ public class AutoRDR {
     // Creates a WEKA classifier (J48) using instances data
     private Classifier createClassifier(Instances data) {
         J48 j = new J48();
+
+        j.setBatchSize("100");
         j.setBinarySplits(true);
-        j.setMinNumObj(0);
-        j.setUnpruned(true);
+        j.setCollapseTree(true);
         j.setConfidenceFactor(1);
+        j.setDebug(false);
+        j.setDoNotCheckCapabilities(false);
+        j.setDoNotMakeSplitPointActualValue(false);
+        j.setMinNumObj(0);
+        j.setNumFolds(3);
+        j.setReducedErrorPruning(false);
+        j.setSaveInstanceData(false);
+        j.setSeed(1);
+        j.setSubtreeRaising(true);
+        j.setUnpruned(true);
+        j.setUseLaplace(false);
+        j.setUseLaplace(true);
+        
         if (data != null) {
             try {
                 j.buildClassifier(data);
             } catch (Exception ex) {
                 Logger.getLogger(AutoRDR.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+        try {
+            System.out.println(j.graph());
+        } catch (Exception ex) {
+            Logger.getLogger(AutoRDR.class.getName()).log(Level.SEVERE, null, ex);
         }
         return j;
     }
