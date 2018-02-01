@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +32,7 @@ public class AutoRDR {
     private Classifier wekaClassifier;
     private RDRTree rdrTree;
     private Evaluation wekaEvaluation;
+    private boolean allowInaccurateModels = true;
     
     public static void main(String[] args) throws ScriptException {
         String[][] matrix = {
@@ -41,13 +43,86 @@ public class AutoRDR {
             {"5.9", "3.0", "5.1", "1.8", "Iris-virginica"}
         };
 //        CaseList caseList = CaseList.createFromArray(matrix);
-//        CaseList caseList = CaseList.createFromFile("export.csv");
-        CaseList caseList = CaseList.createFromFile("iris.csv");
+//        CaseList caseList = CaseList.createFromFile("roundexport.csv");
+//        CaseList caseList = CaseList.createFromFile("1dWorstCase.csv"); // real and string passed
+//        CaseList caseList = CaseList.createFromFile("2dWorstCase.csv"); // read and string passed
+//        CaseList caseList = CaseList.createFromFile("fakeexport.csv"); //real passed
+//        CaseList caseList = CaseList.createFromFile("binexport.csv"); 
+//        CaseList caseList = CaseList.createFromFile("iris.csv");
+//        CaseList caseList = CaseList.createFromFile("agentexport.csv");
+//        CaseList caseList = CaseList.createFromFile("realexport.csv");
         
         
-        RDRTree rdr = AutoRDR.createRDR(caseList);
-        System.out.println(rdr);
-        rdr.evaluate(caseList);
+////        RDRTree rdr = AutoRDR.createRDR(caseList);
+//        AutoRDR auto = new AutoRDR(caseList);
+//        RDRTree rdr = auto.getRDRTree();
+//        Classifier weka = auto.getWekaClassifier();
+////        
+////
+//        System.out.println(weka);
+//        System.out.println(rdr);
+//        System.out.println("WEKA ACC: " + auto.getWekaEvaluation().pctCorrect());
+//        rdr.evaluate(caseList);
+        
+//        for(Case c : caseList){
+//            Classification classification = rdr.classify(c);
+//            if(!String.valueOf(c.get("classification")).equalsIgnoreCase(classification.toString())){
+////                System.out.println("Correct");
+////                System.out.println(c.toString());
+//                System.out.println(c.get("position") + "," + c.get("velocity") + "," + c.get("classification"));
+//            }
+//        }
+        quickTest();
+
+    }
+    
+    public static void quickTest(){
+        ArrayList<String> caseLists = new ArrayList<>();
+        caseLists.add("binexport.csv");
+        caseLists.add("iris.csv");
+        caseLists.add("1dWorstCase.csv");
+        caseLists.add("2dWorstCase.csv");
+        caseLists.add("roundexport.csv");
+        caseLists.add("realexport.csv");
+        caseLists.add("fakeexport.csv");
+        caseLists.add("agentexport.csv");
+        
+        System.out.println("----------WEKA-TESTING----------");
+        for(String caseListName : caseLists){
+            CaseList caseList = CaseList.createFromFile(caseListName);
+            AutoRDR auto = new AutoRDR(caseList);
+            if(auto.getWekaEvaluation().pctCorrect() == 100){
+                System.out.println("PASSED\t\t\t'" + caseListName + "'");
+            } else {
+                System.out.println("\tFAILED (" + auto.getWekaEvaluation().pctCorrect() + ")\t'" + caseListName + "'");
+            }
+        }
+        System.out.println("--------------------------------");
+        System.out.println("");
+        System.out.println("----------RDR--TESTING-----------");
+        for(String caseListName : caseLists){
+            CaseList caseList = CaseList.createFromFile(caseListName);
+            AutoRDR auto = new AutoRDR(caseList);
+            if(auto.getWekaEvaluation().pctCorrect() == 100){
+//                System.out.println("'" + caseListName + "' WEKA PASSED");
+                
+                RDRTree rdr = auto.getRDRTree();
+                try {
+                    HashMap<String, Double> result = rdr.evaluate(caseList, 0);
+                    if(result.get("accuracy") != 100){
+                        System.out.println("\tFAILED\t\t'" + caseListName + "'");
+                    } else {
+                        System.out.println("\tPASSED\t\t'" + caseListName + "'");
+                    }
+                } catch (ScriptException ex) {
+                    System.out.println("SCRIPT ERROR\t\t\t'" + caseListName + "'");
+                }
+                
+            } else {
+//                System.out.println("'" + caseListName + "' WEKA FAILED");
+            }
+        }
+        System.out.println("--------------------------------");
     }
     
     public static RDRTree createRDR(CaseList caseList){
@@ -57,10 +132,6 @@ public class AutoRDR {
     public AutoRDR(CaseList caseList) {
         Instances data = caseListToInstances(caseList);
         this.wekaClassifier = createClassifier(data);
-        this.wekaEvaluation = evaluateWekaClassifier(this.wekaClassifier, data);
-        if(this.wekaEvaluation.pctCorrect() != 100){
-            System.out.println("WARNING: WEKA Classifier does not accurately classifier all cases. The resulting RDR tree may be incorrect.");
-        }
         this.rdrTree = createRDRFromWekaClassifier(this.wekaClassifier);
     }
 
@@ -75,10 +146,6 @@ public class AutoRDR {
     public Evaluation getWekaEvaluation() {
         return wekaEvaluation;
     }
-    
-    
-    
-    
 
     // Attempts to find and set the class index in the weka data
     private void findAndSetClassIndex(Instances data){
@@ -212,22 +279,40 @@ public class AutoRDR {
         J48 j = new J48();
 
         j.setBatchSize("100");
-        j.setBinarySplits(true);
+        j.setBinarySplits(false);
         j.setCollapseTree(true);
         j.setConfidenceFactor(1);
-        j.setDebug(false);
-        j.setDoNotCheckCapabilities(false);
+//        j.setDebug(true);
+//        j.setDoNotCheckCapabilities(false);
         j.setDoNotMakeSplitPointActualValue(false);
         j.setMinNumObj(0);
         j.setNumFolds(3);
         j.setReducedErrorPruning(false);
-        j.setSaveInstanceData(false);
+//        j.setSaveInstanceData(false);
         j.setSeed(1);
-        j.setSubtreeRaising(true);
+        j.setSubtreeRaising(false);
         j.setUnpruned(true);
         j.setUseLaplace(false);
-        j.setUseLaplace(true);
-        
+        j.setNumDecimalPlaces(10);
+//        j.setUseLaplace(true);
+//        j.setBatchSize("100");
+//        j.setBinarySplits(false);
+//        j.setCollapseTree(true);
+//        j.setConfidenceFactor(1);
+//        j.setDebug(false);
+//        j.setDoNotCheckCapabilities(true);
+//        j.setDoNotMakeSplitPointActualValue(false);
+//        j.setMinNumObj(0);
+//        j.setNumFolds(3);
+//        j.setReducedErrorPruning(false);
+//        j.setSaveInstanceData(false);
+//        j.setSeed(1);
+//        j.setSubtreeRaising(false);
+//        j.setUnpruned(false);
+//        j.setUseLaplace(false);
+//        j.setUseMDLcorrection(true);
+
+
         if (data != null) {
             try {
                 j.buildClassifier(data);
@@ -235,11 +320,21 @@ public class AutoRDR {
                 Logger.getLogger(AutoRDR.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        try {
-            System.out.println(j.graph());
-        } catch (Exception ex) {
-            Logger.getLogger(AutoRDR.class.getName()).log(Level.SEVERE, null, ex);
+        
+        this.wekaEvaluation = evaluateWekaClassifier(j, data);
+        if(this.wekaEvaluation.pctCorrect() != 100){
+            if(!this.allowInaccurateModels){
+                System.out.println("WARNING: WEKA Classifier does not accurately classifier all cases. The resulting RDR tree may be incorrect.");
+                System.err.println("WEKA Classifier Build Failed.");
+                System.exit(0);
+            }
         }
+        
+//        try {
+//            System.out.println(j.graph());
+//        } catch (Exception ex) {
+//            Logger.getLogger(AutoRDR.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         return j;
     }
     
@@ -268,6 +363,7 @@ public class AutoRDR {
     }
 
     
+    // Converts weka j48 classifier into RDR
     private RDRTree createRDRFromWekaClassifier(Classifier classifier) {
         String weka = wekaSummaryToTreeString(classifier.toString());
         String[] split = weka.split("\n");
@@ -318,9 +414,13 @@ public class AutoRDR {
     private String[] parseRuleString(String raw) {
         raw = raw.replaceAll("\\|   ", "");
         String[] rule = raw.split(":");
+//        rule[0] = rule[0].substring(0, rule[0].lastIndexOf(" ")+1) + "\"" + rule[0].substring(rule[0].lastIndexOf(" ")+1) + "\"";
+        rule[0] = rule[0].replaceAll(" = ", " == ");
+        
         if (rule.length == 2) {
             rule[1] = rule[1].substring(1, rule[1].lastIndexOf(" "));
         }
+//        System.out.println("RULE: '" + rule[0] + "'");
         return rule;
     }
 
