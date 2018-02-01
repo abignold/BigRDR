@@ -18,20 +18,6 @@ import java.util.LinkedHashMap;
  */
 public class CaseList extends ArrayList<Case> {
 
-// I can't remember what this does so I'm removing it.
-//    public static void main(String[] args) {
-//        String[][] matrix = {
-//            {"sepallength", "sepalwidth", "petallength", "petalwidth", "classification"},
-//            {"real", "real", "real", "real", "string"},
-//            {"5.1", "3.8", "1.9", "0.4", "Iris-setosa"},
-//            {"7.0", "3.2", "4.7", "1.4", "Iris-versicolor"},
-//            {"5.9", "3.0", "5.1", "1.8", "Iris-virginica"}
-//        };
-//        CaseList c = CaseList.createFromFile("iris.csv");
-//        int x = 0;
-//        x ++;
-//    }
-
     public static CaseList createFromFile(String filename) {
         return processFile(filename);
     }
