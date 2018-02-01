@@ -1,0 +1,17 @@
+@relation gridworld
+
+@attribute x real
+@attribute y real
+@attribute class {UP, DOWN, LEFT, RIGHT}
+
+@data
+0,0,RIGHT
+1,0,RIGHT
+2,0,RIGHT
+0,1,UP
+2,1,UP
+0,2,UP
+1,2,RIGHT
+2,2,UP
+3,2,LEFT
+
