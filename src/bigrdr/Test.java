@@ -17,17 +17,62 @@ public class Test {
         testRuleFormatterIsVariableMethod();
         testRuleEvaluator(testCase);
         testTreeCreation(testCase);
+        testDifferenceList();
+        
     }
 
-    private static void testTreeCreation(Case testCase) throws ScriptException {
-        System.out.println("Testing tree creation");
-        RDRTree tree = new RDRTree();
-        System.out.println("-----TREE-TEST-----");
-        Classification result = tree.classify(testCase);
-        System.out.println("Classification: " + result.getClassificationNode().getClassificationString());
-        System.out.println("Result: " + result.getInsertionClassification());
+    
+    private static void testDifferenceList(){
+        System.out.println("Testing difference list creation");
+        CaseList caseList = getCaseList();
+        Case case1 = caseList.get(0);
+        Case case2 = caseList.get(1);
+        System.out.println("-----DIFF-TEST-----");
+//        case1.getDifferenceList(case2);
+        System.out.println(case1.isDifference("AppleInt", case2));
+
         System.out.println("-------------------");
         System.out.println("");
+    }
+    
+    private static CaseList getCaseList(){
+        CaseList caseList = new CaseList();
+        
+        Case testCase = new Case();
+        testCase.put("AppleInt", 0);
+        testCase.put("BananaDouble", 1.0d);
+        testCase.put("CherryFloat", 2.0f);
+        testCase.put("DragonfruitBoolean", true);
+        testCase.put("ElderflowerString", "redVSblue");
+        testCase.put("FruitChar", 'c');
+        testCase.put("GogurtStringSpace", "yellow black");
+        testCase.put("CaseOneUnique", "nop_nop_nop_nop");
+        caseList.add(testCase);
+        
+        testCase = new Case();
+        testCase.put("AppleInt", 1);
+        testCase.put("BananaDouble", 1.0d);
+        testCase.put("CherryFloat", 3.0f);
+        testCase.put("DragonfruitBoolean", true);
+        testCase.put("ElderflowerString", "blueVSred");
+        testCase.put("FruitChar", 'c');
+        testCase.put("GogurtStringSpace", "yellow black");
+        testCase.put("CaseTwoUnique", "yep_yep_yep_yep");
+        caseList.add(testCase);
+        
+        return caseList;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    private static void testTreeCreation(Case testCase) throws ScriptException {
+        
     }
 
     private static void testRuleEvaluator(Case testCase) throws ScriptException {
@@ -35,7 +80,7 @@ public class Test {
         String[][] rules = {
             {"1 + 1 == 2", "true"},
             {"5 == 2", "false"},
-            {"Apple > 0.1 || Gogurt == \"yellow black\"", "true"}
+            {"AppleInt > 0.1 || GogurtStringSpace == \"yellow black\"", "true"}
         };
         
         System.out.println("-----RULE-TEST-----");
@@ -73,13 +118,13 @@ public class Test {
     private static Case createTestCase() {
         System.out.print("Creating new case... ");
         Case testCase = new Case();
-        testCase.put("Apple", 0);
-        testCase.put("Banana", 1.0d);
-        testCase.put("Cherry", 2.0f);
-        testCase.put("Dragonfruit", true);
-        testCase.put("Elderflower", "redVSblue");
-        testCase.put("Fruit", 'c');
-        testCase.put("Gogurt", "yellow black");
+        testCase.put("AppleInt", 0);
+        testCase.put("BananaDouble", 1.0d);
+        testCase.put("CherryFloat", 2.0f);
+        testCase.put("DragonfruitBoolean", true);
+        testCase.put("ElderflowerString", "redVSblue");
+        testCase.put("FruitChar", 'c');
+        testCase.put("GogurtStringSpace", "yellow black");
         System.out.println("Done.");
         System.out.println("-----TEST-CASE-----");
         testCase.print();
